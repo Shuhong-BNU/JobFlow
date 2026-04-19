@@ -1,76 +1,76 @@
-import type { Config } from "tailwindcss";
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  darkMode: ["class", '[data-theme="dark"]'],
+  darkMode: ['class'],
   content: [
-    "./app/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./features/**/*.{ts,tsx}",
-    "./hooks/**/*.{ts,tsx}",
-    "./lib/**/*.{ts,tsx}",
-    "./server/**/*.{ts,tsx}",
+    './app/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './features/**/*.{ts,tsx}',
   ],
   theme: {
+    container: {
+      center: true,
+      padding: '2rem',
+      screens: { '2xl': '1400px' },
+    },
     extend: {
       colors: {
-        background: "rgb(var(--background-rgb) / <alpha-value>)",
-        foreground: "rgb(var(--foreground-rgb) / <alpha-value>)",
-        card: {
-          DEFAULT: "rgb(var(--card-rgb) / <alpha-value>)",
-          foreground: "rgb(var(--card-foreground-rgb) / <alpha-value>)",
-        },
-        muted: {
-          DEFAULT: "rgb(var(--muted-rgb) / <alpha-value>)",
-          foreground: "rgb(var(--muted-foreground-rgb) / <alpha-value>)",
-        },
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: "rgb(var(--primary-rgb) / <alpha-value>)",
-          foreground: "rgb(var(--primary-foreground-rgb) / <alpha-value>)",
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
         },
         secondary: {
-          DEFAULT: "rgb(var(--secondary-rgb) / <alpha-value>)",
-          foreground: "rgb(var(--secondary-foreground-rgb) / <alpha-value>)",
-        },
-        accent: {
-          DEFAULT: "rgb(var(--accent-rgb) / <alpha-value>)",
-          foreground: "rgb(var(--accent-foreground-rgb) / <alpha-value>)",
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
         },
         destructive: {
-          DEFAULT: "rgb(var(--destructive-rgb) / <alpha-value>)",
-          foreground: "rgb(var(--destructive-foreground-rgb) / <alpha-value>)",
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
         },
-        border: "rgb(var(--border-rgb) / <alpha-value>)",
-        input: "rgb(var(--input-rgb) / <alpha-value>)",
-        ring: "rgb(var(--ring-rgb) / <alpha-value>)",
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
       },
       borderRadius: {
-        xl: "calc(var(--radius) + 8px)",
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 6px)",
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
-      fontFamily: {
-        sans: [
-          "Aptos",
-          "Segoe UI",
-          "PingFang SC",
-          "Noto Sans CJK SC",
-          "Microsoft YaHei",
-          "sans-serif",
-        ],
-        mono: [
-          "Cascadia Code",
-          "IBM Plex Mono",
-          "SFMono-Regular",
-          "monospace",
-        ],
+      keyframes: {
+        'accordion-down': {
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' },
+        },
+        'accordion-up': {
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' },
+        },
       },
-      boxShadow: {
-        soft: "var(--shadow-soft)",
-        card: "var(--shadow-card)",
+      animation: {
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
       },
     },
   },
+  plugins: [require('tailwindcss-animate')],
 };
 
 export default config;

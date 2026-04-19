@@ -1,13 +1,13 @@
-import "dotenv/config";
-import { defineConfig } from "drizzle-kit";
+import 'dotenv/config';
+import type { Config } from 'drizzle-kit';
 
-export default defineConfig({
-  schema: "./db/schema/index.ts",
-  out: "./db/migrations",
-  dialect: "postgresql",
+export default {
+  schema: './db/schema.ts',
+  out: './db/migrations',
+  dialect: 'postgresql',
   dbCredentials: {
-    url:
-      process.env.DATABASE_URL ??
-      "postgresql://postgres:postgres@127.0.0.1:5432/jobflow",
+    url: process.env.DATABASE_URL!,
   },
-});
+  strict: true,
+  verbose: true,
+} satisfies Config;

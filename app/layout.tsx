@@ -1,30 +1,26 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { AppProviders } from "@/components/providers/app-providers";
-import { getAppLocale, getHtmlLang } from "@/lib/i18n";
+import type { Metadata } from 'next';
+import './globals.css';
+import { Providers } from './providers';
+import { Toaster } from '@/components/ui/sonner';
+import { getLocale } from '@/lib/i18n/server';
+import { getDictionary } from '@/lib/i18n/dictionaries';
+import { LOCALE_HTML_LANG } from '@/lib/i18n/config';
 
-const locale = getAppLocale();
+export function generateMetadata(): Metadata {
+  const dict = getDictionary(getLocale());
+  return {
+    title: dict.meta.title,
+    description: dict.meta.description,
+  };
+}
 
-export const metadata: Metadata = {
-  title: {
-    default: "JobFlow",
-    template: "%s | JobFlow",
-  },
-  description:
-    locale === "en"
-      ? "A job application management board for recruiting season, helping you track roles, deadlines, progress, and risks in one place."
-      : "面向求职季的申请流程管理看板，帮助你统一管理岗位、截止日期、进度与风险。",
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = getLocale();
   return (
-    <html lang={getHtmlLang(locale)} suppressHydrationWarning>
-      <body>
-        <AppProviders>{children}</AppProviders>
+    <html lang={LOCALE_HTML_LANG[locale]} suppressHydrationWarning>
+      <body className="min-h-screen bg-background font-sans antialiased">
+        <Providers locale={locale}>{children}</Providers>
+        <Toaster richColors closeButton />
       </body>
     </html>
   );

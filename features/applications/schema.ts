@@ -1,113 +1,86 @@
-import { z } from "zod";
+import { z } from 'zod';
 import {
-  applicationPriorities,
-  applicationSources,
-  applicationStatuses,
-  employmentTypes,
-} from "@/lib/constants";
+  APPLICATION_STATUSES,
+  EMPLOYMENT_TYPES,
+  PRIORITIES,
+} from '@/lib/enums';
 
-const optionalText = z.string().trim().optional().or(z.literal(""));
-const optionalUrl = optionalText.refine(
-  (value) => !value || z.string().url().safeParse(value).success,
-  "请输入有效链接。",
-);
+const optionalString = z
+  .string()
+  .trim()
+  .max(2000)
+  .optional()
+  .or(z.literal('').transform(() => undefined));
+
+const optionalUrl = z
+  .string()
+  .trim()
+  .max(2000)
+  .url()
+  .optional()
+  .or(z.literal('').transform(() => undefined));
+
+/**
+ * 同时接受客户端的原始字符串与 react-hook-form + zodResolver 已经 transform 过的
+ * Date 对象。之前只声明成 `.string().transform(...)`，导致 server action 再次
+ * safeParse 时拿到 Date 对象会在 `.string()` 层失败，然后整表单被误判为
+ * "invalidInput" — 这就是"新建申请总是显示输入有误"的根因。
+ */
+const optionalDate = z
+  .union([z.string(), z.date()])
+  .optional()
+  .transform((v, ctx) => {
+    if (v === undefined || v === null) return undefined;
+    if (v instanceof Date) {
+      if (Number.isNaN(v.getTime())) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'invalidDate' });
+        return z.NEVER;
+      }
+      return v;
+    }
+    const trimmed = v.trim();
+    if (!trimmed) return undefined;
+    const parsed = new Date(trimmed);
+    if (Number.isNaN(parsed.getTime())) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'invalidDate' });
+      return z.NEVER;
+    }
+    return parsed;
+  });
 
 export const applicationFormSchema = z.object({
-  companyName: z.string().trim().min(2, "公司名至少 2 个字符。").max(160),
-  companyWebsite: optionalUrl,
-  companyIndustry: optionalText,
-  companyLocation: optionalText,
-  title: z.string().trim().min(2, "岗位名至少 2 个字符。").max(180),
-  department: optionalText,
-  location: optionalText,
-  source: z.enum(applicationSources),
+  companyName: z.string().trim().min(1, 'companyRequired').max(200),
+  title: z.string().trim().min(1, 'titleRequired').max(200),
+  department: optionalString,
+  location: optionalString,
+  source: optionalString,
   sourceUrl: optionalUrl,
-  employmentType: z.enum(employmentTypes),
-  currentStatus: z.enum(applicationStatuses),
-  priority: z.enum(applicationPriorities),
-  deadlineAt: optionalText,
-  appliedAt: optionalText,
-  referralName: optionalText,
-  salaryMin: optionalText,
-  salaryMax: optionalText,
-  salaryCurrency: optionalText,
-  salaryPeriod: z.enum(["monthly", "yearly"]).optional().or(z.literal("")),
-  notes: optionalText,
+  employmentType: z.enum(EMPLOYMENT_TYPES).default('fulltime'),
+  currentStatus: z.enum(APPLICATION_STATUSES).default('wishlist'),
+  priority: z.enum(PRIORITIES).default('medium'),
+  deadlineAt: optionalDate,
+  appliedAt: optionalDate,
+  salaryRange: optionalString,
+  referralName: optionalString,
+  notes: optionalString,
 });
 
-export type ApplicationFormValues = z.infer<typeof applicationFormSchema>;
+export type ApplicationFormInput = z.input<typeof applicationFormSchema>;
+export type ApplicationFormValues = z.output<typeof applicationFormSchema>;
 
-export type ApplicationFormActionState = {
-  error?: string;
-  fieldErrors?: Partial<Record<keyof ApplicationFormValues, string[]>>;
-};
+export const moveStatusSchema = z.object({
+  applicationId: z.string().uuid(),
+  status: z.enum(APPLICATION_STATUSES),
+  /** Insert before this neighbor; null = end of column. */
+  beforeId: z.string().uuid().nullable().optional(),
+});
 
-export function mapApplicationFormData(formData: FormData): ApplicationFormValues {
-  return {
-    companyName: String(formData.get("companyName") ?? ""),
-    companyWebsite: String(formData.get("companyWebsite") ?? ""),
-    companyIndustry: String(formData.get("companyIndustry") ?? ""),
-    companyLocation: String(formData.get("companyLocation") ?? ""),
-    title: String(formData.get("title") ?? ""),
-    department: String(formData.get("department") ?? ""),
-    location: String(formData.get("location") ?? ""),
-    source: String(formData.get("source") ?? "official_site") as ApplicationFormValues["source"],
-    sourceUrl: String(formData.get("sourceUrl") ?? ""),
-    employmentType: String(
-      formData.get("employmentType") ?? "internship",
-    ) as ApplicationFormValues["employmentType"],
-    currentStatus: String(
-      formData.get("currentStatus") ?? "wishlist",
-    ) as ApplicationFormValues["currentStatus"],
-    priority: String(formData.get("priority") ?? "medium") as ApplicationFormValues["priority"],
-    deadlineAt: String(formData.get("deadlineAt") ?? ""),
-    appliedAt: String(formData.get("appliedAt") ?? ""),
-    referralName: String(formData.get("referralName") ?? ""),
-    salaryMin: String(formData.get("salaryMin") ?? ""),
-    salaryMax: String(formData.get("salaryMax") ?? ""),
-    salaryCurrency: String(formData.get("salaryCurrency") ?? ""),
-    salaryPeriod: String(formData.get("salaryPeriod") ?? "") as ApplicationFormValues["salaryPeriod"],
-    notes: String(formData.get("notes") ?? ""),
-  };
-}
-
-function emptyToNull(value: string | undefined) {
-  if (!value) {
-    return null;
-  }
-
-  return value.trim() || null;
-}
-
-export function mapApplicationFormToDbInput(values: ApplicationFormValues) {
-  const salaryMin = values.salaryMin ? Number(values.salaryMin) : undefined;
-  const salaryMax = values.salaryMax ? Number(values.salaryMax) : undefined;
-
-  return {
-    companyName: values.companyName.trim(),
-    companyWebsite: emptyToNull(values.companyWebsite),
-    companyIndustry: emptyToNull(values.companyIndustry),
-    companyLocation: emptyToNull(values.companyLocation),
-    title: values.title.trim(),
-    department: emptyToNull(values.department),
-    location: emptyToNull(values.location),
-    source: values.source,
-    sourceUrl: emptyToNull(values.sourceUrl),
-    employmentType: values.employmentType,
-    currentStatus: values.currentStatus,
-    priority: values.priority,
-    deadlineAt: values.deadlineAt ? new Date(`${values.deadlineAt}T00:00:00`) : null,
-    appliedAt: values.appliedAt ? new Date(`${values.appliedAt}T00:00:00`) : null,
-    referralName: emptyToNull(values.referralName),
-    notes: emptyToNull(values.notes),
-    salaryRange:
-      salaryMin || salaryMax || values.salaryCurrency || values.salaryPeriod
-        ? {
-            min: Number.isFinite(salaryMin) ? salaryMin : undefined,
-            max: Number.isFinite(salaryMax) ? salaryMax : undefined,
-            currency: emptyToNull(values.salaryCurrency) ?? undefined,
-            period: values.salaryPeriod || undefined,
-          }
-        : null,
-  };
-}
+export const listFiltersSchema = z.object({
+  q: z.string().trim().max(200).optional(),
+  status: z.enum(APPLICATION_STATUSES).optional(),
+  priority: z.enum(PRIORITIES).optional(),
+  sort: z.enum(['deadline_asc', 'deadline_desc', 'updated_desc', 'created_desc']).default(
+    'updated_desc'
+  ),
+});
+export type ListFilters = z.infer<typeof listFiltersSchema>;

@@ -1,295 +1,174 @@
 # JobFlow
 
-JobFlow 是一个面向大学生求职季的求职申请管理看板 Web 应用。
+[English README](./README.en.md)
 
-它不是招聘网站，也不是自动海投工具。项目核心是把岗位申请、截止日期、时间线、材料版本、Offer 记录、基础分析和 AI 辅助能力统一到一个清晰、可演示、可扩展的产品骨架里。
+一个专注于求职流程管理的工作台。申请、截止日、面试、时间线和 Offer 线索，集中放在同一块看板里。
 
-当前仓库已经完成：
-- Phase 1：可运行 MVP
-- Phase 2：完整求职管理原型
-- Phase 3：AI 增强层第一版
+当前仓库处于 **Phase 1 MVP**。已完成认证、申请 CRUD、看板拖拽、列表筛选、详情页与仪表盘；**不包含** Phase 2 功能、AI 功能和 Gmail 集成。
+
+## 当前能力
+
+- 邮箱注册、登录、退出登录
+- 申请 CRUD，自动创建公司记录
+- 8 列固定看板，支持拖拽更新状态
+- 列表页搜索、筛选、排序
+- 仪表盘：状态统计、近期截止日、事件、风险提醒、最近更新
+- 申请详情：概览 + 时间线（事件、备注）
+- 中英双语切换，默认中文，使用 cookie 持久化
+- 明暗主题切换
 
 ## 技术栈
 
-- Next.js App Router
-- TypeScript strict mode
-- Tailwind CSS
-- Auth.js Credentials
-- Drizzle ORM
-- PostgreSQL
-- React Hook Form + Zod
-- dnd-kit
+- **框架：** Next.js 14（App Router）+ TypeScript（strict）
+- **UI：** Tailwind CSS + shadcn/ui 风格基础组件
+- **数据流：** React Server Components + Server Actions + React Query
+- **认证：** NextAuth v5（Credentials / JWT Session）+ Drizzle Adapter
+- **数据库：** Supabase Postgres
+- **ORM：** Drizzle ORM + drizzle-kit
+- **拖拽：** dnd-kit
 
-## 当前已实现
+## 本地运行
 
-### Phase 1
-- 注册 / 登录 / 登出
-- Dashboard 总览
-- Applications Board 看板
-- Application CRUD
-- 搜索 / 筛选 / 拖拽改状态
-- Application Detail 基础信息页
+### 1. 环境要求
 
-### Phase 2
-- `/calendar` 月视图日历
-- application events 新增 / 编辑 / 删除
-- deadline 事件只读展示，并继续由 `applications.deadline_at` 自动同步
-- `/materials` 材料中心
-- 本地文件上传 + 外部文件链接两种材料来源
-- 材料新增 / 编辑 / 删除
-- 材料与岗位绑定 / 解绑
-- Application Detail 中的 timeline / notes / materials / offer 维护能力
-- `/offers` Offer 列表与对比
-- `/analytics` 基础分析页
+- Node.js 18.18+，推荐 20+
+- 一个可用的 Supabase 项目
 
-### Phase 3
-- `/applications/new` 中的 AI JD 解析草稿
-- `/applications/[id]` 中的 AI 下一步建议
-- `/applications/[id]` 中的 AI 面试准备摘要
-- OpenAI-compatible provider abstraction
-- `ai_tasks` 调用记录
-- response schema 校验
-- provider 失败后的 fallback
-
-## 项目结构
-
-```text
-app/                  路由与页面
-components/           通用 UI 与共享组件
-features/             按业务域拆分的模块
-db/                   schema / migrations / seeds
-lib/                  常量、标签、工具函数
-server/               权限与服务端辅助逻辑
-docs/phases/          各阶段实施记录
-```
-
-## 本机运行流程
-
-### 1. 安装依赖
+### 2. 安装依赖
 
 ```bash
 npm install
 ```
 
-### 2. 准备环境变量
-
-Next.js 运行时读取 `.env.local`，而当前 `db:seed` 这条 CLI 会读取 `.env`。
-
-因此本地建议同时准备两份：
-
-```powershell
-Copy-Item .env.example .env.local
-Copy-Item .env.example .env
-```
-
-至少确认下面两个变量可用：
-
-```env
-DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/jobflow
-AUTH_SECRET=jobflow-local-dev-secret
-```
-
-如果要启用真实 AI provider，再额外填写：
-
-```env
-OPENAI_API_KEY=
-OPENAI_BASE_URL=
-OPENAI_MODEL=
-```
-
-说明：
-- 不配置 AI 环境变量时，Phase 3 仍然可用，但会走 fallback 规则
-- AI 结果仍然只作为建议 / 草稿 / 预填充，不会直接写业务主表
-
-### 3. 启动数据库
+### 3. 配置环境变量
 
 ```bash
-docker compose up -d
+cp .env.example .env
 ```
 
-### 4. 执行迁移
+至少需要填写以下变量：
+
+- `DATABASE_URL`
+  指向 Supabase Postgres 的连接串。Phase 1 开发默认使用直连端口 `5432`。
+- `AUTH_SECRET`
+  可用 `openssl rand -base64 32` 生成。
+- `AUTH_URL`
+  默认是 `http://localhost:3001`。
+
+其余 Supabase Storage、OpenAI 相关变量可以留空。当前阶段不会启用。
+
+### 4. 初始化数据库
 
 ```bash
-npm run db:migrate
-```
-
-### 5. 导入演示数据
-
-```bash
+npm run db:push
 npm run db:seed
 ```
 
-默认演示账号：
-- `demo@jobflow.local`
-- `Demo12345!`
+种子数据会创建一个演示账号：
 
-### 6. 启动开发环境
+```text
+demo@jobflow.local / demo1234
+```
+
+### 5. 启动开发环境
 
 ```bash
 npm run dev
 ```
 
-默认访问地址通常是：
-- [http://localhost:3000](http://localhost:3000)
+打开 [http://localhost:3001](http://localhost:3001)。
 
-如果 `3000` 端口被占用，请以终端实际输出为准。
+## 端口说明
 
-### 一键启动
+- 开发和启动脚本默认固定使用 `3001`
+- 这样可以避开常见的 `3000` 冲突
+- 如果改用其他端口，需要同时更新 `.env` 中的 `AUTH_URL`
 
-如果你在 Windows 本机上希望“一条命令跑起来”，现在可以直接执行：
+示例：
 
-```powershell
-npm run start:local
+```bash
+npx next dev -p 3002
 ```
 
-它会自动完成：
+对应：
 
-1. 检查并补齐 `.env.local` / `.env`
-2. 检查 Docker 是否就绪；若未启动，会尝试拉起 Docker Desktop
-3. 启动 `docker compose`
-4. 等待数据库端口就绪
-5. 执行 `db:migrate`
-6. 执行 `db:seed`
-7. 启动 `next dev`
+```env
+AUTH_URL=http://localhost:3002
+```
 
-现在的一键启动会严格按顺序执行，前一步失败就停止，不会再出现：
+## 最短启动路径
 
-- Docker 没启动，但后面继续跑
-- 数据库没连上，但应用仍然继续启动
-- 最后只有页面查询报错，排查点不清楚
+```bash
+npm install
+cp .env.example .env
+npm run db:push
+npm run db:seed
+npm run dev
+```
 
-如果你更习惯双击启动，也可以直接运行根目录的：
+## 验收方式
+
+建议按下面顺序做一轮本地 smoke test：
+
+1. 在 `/auth/sign-up` 注册新账号，成功进入 `/app`
+2. 从头像菜单退出登录，再使用 `demo@jobflow.local / demo1234` 登录
+3. 检查 `/app` 仪表盘是否显示统计、截止日、事件、风险和最近更新
+4. 打开 `/app/board`，确认 8 列看板正常渲染
+5. 拖动任意卡片到新列，刷新后状态仍保持
+6. 在 `/app/applications/new` 新建一条申请，确认新公司可自动创建
+7. 打开详情页，新增一条事件和一条备注
+8. 进入编辑页，修改状态、优先级或截止日并保存
+9. 在列表页测试搜索、筛选、排序和清空
+10. 切换中英文，确认当前页面文案立即更新，刷新后语言保持不变
+11. 切换明暗主题，确认界面正常
+12. 退出登录后直接访问 `/app`，确认会被重定向到登录页
+
+## Phase 1 边界
+
+当前明确 **不包含**：
+
+- Calendar / Materials / Offers / Analytics 的正式功能实现
+- AI 功能
+- Gmail 集成
+- 数据库 schema 扩展
+
+这些页面当前保留为占位入口，用于稳定导航结构，不代表已进入下一阶段开发。
+
+## 常用脚本
+
+| 脚本 | 说明 |
+| --- | --- |
+| `npm run dev` | 启动开发服务器 |
+| `npm run build` | 生产构建 |
+| `npm run lint` | 运行 ESLint |
+| `npm run typecheck` | 运行 TypeScript 类型检查 |
+| `npm run db:generate` | 生成 Drizzle migration |
+| `npm run db:push` | 推送 schema 到数据库 |
+| `npm run db:studio` | 打开 Drizzle Studio |
+| `npm run db:seed` | 注入演示数据 |
+
+## 目录结构
 
 ```text
-start-local.bat
+app/                    Next.js App Router 路由
+  page.tsx              落地页
+  auth/                 登录 / 注册
+  api/auth/             NextAuth 与注册接口
+  app/                  登录后应用壳层
+    page.tsx            仪表盘
+    board/              看板
+    list/               列表
+    applications/       新建 / 详情 / 编辑
+features/               业务域代码（query、action、schema、组件）
+components/             共享组件与应用壳层
+components/ui/          基础 UI 组件
+db/                     Drizzle schema、客户端、seed
+lib/                    认证、i18n、日期、枚举等公共能力
+docs/                   阶段文档
 ```
 
-## 运行日志
+## 相关文档
 
-### 实时日志
-
-- 正常开发时，服务端日志会直接输出到终端
-- 若使用 `npm run start:local`，终端输出会同时落盘
-- 若数据库或 Docker 没准备好，脚本会直接在终端中止并给出失败原因
-
-### 日志文件位置
-
-- `.runtime/logs/dev-时间戳.log`
-
-### 当前日志覆盖范围
-
-目前已经补上了以下关键路径的运行日志：
-
-- 认证缺失跳转
-- Dashboard 总览查询
-- Applications 列表 / 详情 / upcoming events 查询
-- Application 创建 / 编辑 / 删除 / 拖拽改状态
-- Timeline notes / events 的新增、编辑、删除
-- Materials 相关增删改与绑定 / 解绑
-- Offers 保存 / 删除
-- AI 服务调用与 fallback
-
-如果页面出现服务端异常，应用内错误页也会提示查看终端或 `.runtime/logs/`。
-
-## 本地验证建议
-
-### Phase 1 / Phase 2 主流程
-1. 登录
-2. 打开 `/dashboard`
-3. 打开 `/applications`
-4. 新建申请
-5. 编辑申请
-6. 打开详情页
-7. 维护 timeline / materials / offer
-8. 打开 `/calendar`、`/offers`、`/analytics`
-
-### Phase 3 主流程
-1. 打开 `/applications/new`
-2. 粘贴 JD 文本
-3. 生成 AI 解析结果
-4. 应用到申请表单
-5. 创建申请
-6. 打开 `/applications/[id]`
-7. 生成 AI 下一步建议
-8. 生成 AI 面试准备摘要
-9. 确认 AI 输出只作为建议展示，没有自动改状态、自动建事件或自动写 notes
-
-## 当前关键路由
-
-- `/`
-- `/sign-in`
-- `/sign-up`
-- `/dashboard`
-- `/applications`
-- `/applications/new`
-- `/applications/[id]`
-- `/applications/[id]/edit`
-- `/calendar`
-- `/materials`
-- `/offers`
-- `/analytics`
-- `/settings`
-
-## 数据模型范围
-
-当前仓库已落地或已预留的表：
-
-- `users`
-- `user_credentials`
-- `companies`
-- `applications`
-- `application_events`
-- `materials`
-- `application_materials`
-- `application_notes`
-- `offers`
-- `ai_tasks`
-- `mail_connections`
-- `mail_events`
-
-## 当前冻结边界
-
-- Auth 保持 Auth.js Credentials
-- 看板 8 列固定，不开放自定义
-- `applications` 是主聚合对象
-- 一个 `application` 最多一个 `offer`
-- `applications.deadline_at` 与 `application_events.deadline` 自动同步模型保持不变
-- AI 只能作为辅助层，不能反向改变产品主结构
-- 当前阶段不进入 Gmail / Automation
-
-## 材料存储说明
-
-Phase 2 的材料上传默认使用本地存储适配层：
-
-- 上传目录：`public/uploads/materials/<userId>/`
-- 数据库存储：`materials.file_url`
-- 该目录已加入 `.gitignore`
-
-## AI 行为说明
-
-Phase 3 当前只做三件事：
-
-1. JD 自动解析
-2. AI 下一步建议
-3. AI 面试准备摘要
-
-AI 输出默认只用于：
-- 表单预填充
-- 建议展示
-- 准备提纲
-
-AI 不会直接：
-- 创建 application
-- 修改 application 状态
-- 创建 event
-- 写 note
-- 改 offer
-
-## 实施记录
-
-- [Phase 1 记录](./docs/phases/phase-1.md)
-- [Phase 1 运行层验收](./docs/phases/phase-1-runtime-validation.md)
-- [Phase 2 记录](./docs/phases/phase-2.md)
-- [Phase 2 运行层验收](./docs/phases/phase-2-runtime-validation.md)
-- [Phase 3 记录](./docs/phases/phase-3.md)
-- [Phase 4 计划](./docs/phases/phase-4.md)
+- [English README](./README.en.md)
+- [Phase 1 文档](./docs/phase-1.md)
+- [Phase 1 English Doc](./docs/phase-1.en.md)

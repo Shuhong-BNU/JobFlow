@@ -1,303 +1,318 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useActionState, useEffect, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { DatePicker } from '@/components/date-picker';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { APPLICATION_STATUSES, EMPLOYMENT_TYPES, PRIORITIES } from '@/lib/enums';
+import { useT } from '@/lib/i18n/client';
+import type { Dictionary } from '@/lib/i18n/dictionaries';
 import {
   applicationFormSchema,
-  type ApplicationFormActionState,
+  type ApplicationFormInput,
   type ApplicationFormValues,
-} from "@/features/applications/schema";
-import {
-  applicationPriorities,
-  applicationSources,
-  applicationStatuses,
-  employmentTypes,
-} from "@/lib/constants";
-import {
-  applicationPriorityLabels,
-  applicationSourceLabels,
-  applicationStatusLabels,
-  employmentTypeLabels,
-  salaryPeriodLabels,
-} from "@/lib/labels";
+} from '../schema';
+import { createApplication, updateApplication } from '../actions';
 
-const initialState: ApplicationFormActionState = {};
+/** Zod 返回稳定错误码，界面层再映射为当前语言文案。 */
+function translateError(msg: string | undefined, t: Dictionary): string | undefined {
+  if (!msg) return undefined;
+  const map = t.form.errors as Record<string, string>;
+  return map[msg] ?? msg;
+}
 
-export function ApplicationForm({
-  title,
-  description,
-  action,
-  defaultValues,
-  draftValues,
-  draftVersion,
-  submitLabel,
-}: {
-  title: string;
-  description: string;
-  action: (
-    prevState: ApplicationFormActionState,
-    formData: FormData,
-  ) => Promise<ApplicationFormActionState>;
-  defaultValues?: Partial<ApplicationFormValues>;
-  draftValues?: Partial<ApplicationFormValues>;
-  draftVersion?: number;
-  submitLabel: string;
-}) {
-  const [state, formAction] = useActionState(action, initialState);
-  const [isPending, startTransition] = useTransition();
-  const form = useForm<ApplicationFormValues>({
-    resolver: zodResolver(applicationFormSchema),
+function translateActionError(code: string, t: Dictionary): string {
+  const common = t.common as Record<string, string>;
+  return common[code] ?? code;
+}
+
+/** Schema 字段名 → 字典 form.fields 下的 label key。 */
+const FIELD_LABEL_KEY: Record<string, string> = {
+  companyName: 'company',
+  title: 'title',
+  department: 'department',
+  location: 'location',
+  source: 'source',
+  sourceUrl: 'sourceUrl',
+  employmentType: 'type',
+  currentStatus: 'status',
+  priority: 'priority',
+  deadlineAt: 'deadline',
+  appliedAt: 'appliedOn',
+  salaryRange: 'salaryRange',
+  referralName: 'referralName',
+  notes: 'notes',
+};
+
+/** 把 server action 返回的 fieldErrors 里的第一条翻成 "字段名 错误码"。 */
+function firstFieldErrorLabel(
+  fieldErrors: Record<string, string[] | undefined> | undefined,
+  t: Dictionary
+): string | undefined {
+  if (!fieldErrors) return undefined;
+  const fieldLabels = t.form.fields as Record<string, string>;
+  const errorMap = t.form.errors as Record<string, string>;
+  for (const [field, msgs] of Object.entries(fieldErrors)) {
+    const msg = msgs?.[0];
+    if (!msg) continue;
+    const labelKey = FIELD_LABEL_KEY[field] ?? field;
+    const label = fieldLabels[labelKey] ?? field;
+    const translated = errorMap[msg] ?? msg;
+    return `${label} ${translated}`;
+  }
+  return undefined;
+}
+
+type Props = {
+  mode: 'create' | 'edit';
+  applicationId?: string;
+  defaultValues?: Partial<ApplicationFormInput>;
+};
+
+function toDateInputValue(d: Date | string | undefined): string {
+  if (!d) return '';
+  const date = typeof d === 'string' ? new Date(d) : d;
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toISOString().slice(0, 10);
+}
+
+export function ApplicationForm({ mode, applicationId, defaultValues }: Props) {
+  const t = useT();
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+
+  const form = useForm<ApplicationFormInput>({
+    resolver: zodResolver(applicationFormSchema) as never,
     defaultValues: {
-      companyName: "",
-      companyWebsite: "",
-      companyIndustry: "",
-      companyLocation: "",
-      title: "",
-      department: "",
-      location: "",
-      source: "official_site",
-      sourceUrl: "",
-      employmentType: "internship",
-      currentStatus: "wishlist",
-      priority: "medium",
-      deadlineAt: "",
-      appliedAt: "",
-      referralName: "",
-      salaryMin: "",
-      salaryMax: "",
-      salaryCurrency: "CNY",
-      salaryPeriod: "monthly",
-      notes: "",
-      ...defaultValues,
+      companyName: defaultValues?.companyName ?? '',
+      title: defaultValues?.title ?? '',
+      department: defaultValues?.department ?? '',
+      location: defaultValues?.location ?? '',
+      source: defaultValues?.source ?? '',
+      sourceUrl: defaultValues?.sourceUrl ?? '',
+      employmentType: defaultValues?.employmentType ?? 'fulltime',
+      currentStatus: defaultValues?.currentStatus ?? 'wishlist',
+      priority: defaultValues?.priority ?? 'medium',
+      deadlineAt: toDateInputValue(defaultValues?.deadlineAt as never),
+      appliedAt: toDateInputValue(defaultValues?.appliedAt as never),
+      salaryRange: defaultValues?.salaryRange ?? '',
+      referralName: defaultValues?.referralName ?? '',
+      notes: defaultValues?.notes ?? '',
     },
   });
 
-  useEffect(() => {
-    if (!state.fieldErrors) {
-      return;
-    }
+  const { register, handleSubmit, formState, setValue, watch } = form;
 
-    for (const [field, messages] of Object.entries(state.fieldErrors)) {
-      if (!messages?.[0]) {
-        continue;
+  function onSubmit(values: ApplicationFormValues) {
+    startTransition(async () => {
+      const action =
+        mode === 'create'
+          ? createApplication(values as ApplicationFormInput)
+          : updateApplication(applicationId!, values as ApplicationFormInput);
+      const result = await action;
+      if (!result.ok) {
+        // 把 server 返回的第一个字段错误也拼进 toast，避免笼统的"输入有误"。
+        // 例如：`输入有误：截止日 日期格式不正确`
+        const base = translateActionError(result.error, t);
+        const first = firstFieldErrorLabel(result.fieldErrors, t);
+        toast.error(first ? `${base}：${first}` : base);
+        return;
       }
-
-      form.setError(field as keyof ApplicationFormValues, {
-        message: messages[0],
-      });
-    }
-  }, [form, state.fieldErrors]);
-
-  useEffect(() => {
-    if (!draftValues || draftVersion == null) {
-      return;
-    }
-
-    form.reset({
-      ...form.getValues(),
-      ...draftValues,
+      toast.success(mode === 'create' ? t.form.toast.created : t.form.toast.saved);
+      router.push(`/app/applications/${result.data.id}`);
+      router.refresh();
     });
-  }, [draftValues, draftVersion, form]);
-
-  const onSubmit = form.handleSubmit((values) => {
-    const formData = new FormData();
-
-    Object.entries(values).forEach(([key, value]) => {
-      formData.set(key, String(value ?? ""));
-    });
-
-    startTransition(() => {
-      formAction(formData);
-    });
-  });
+  }
 
   return (
-    <form className="space-y-4" onSubmit={onSubmit}>
-      <Card className="bg-card/86">
-        <div className="space-y-2">
-          <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
+    <form onSubmit={handleSubmit(onSubmit as never)} className="space-y-8">
+      <FormSection title={t.form.sections.basics}>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field
+            label={t.form.fields.company}
+            error={translateError(formState.errors.companyName?.message, t)}
+          >
+            <Input placeholder={t.form.placeholders.company} {...register('companyName')} />
+          </Field>
+          <Field
+            label={t.form.fields.title}
+            error={translateError(formState.errors.title?.message, t)}
+          >
+            <Input placeholder={t.form.placeholders.title} {...register('title')} />
+          </Field>
+          <Field label={t.form.fields.department}>
+            <Input placeholder={t.form.placeholders.department} {...register('department')} />
+          </Field>
+          <Field label={t.form.fields.location}>
+            <Input placeholder={t.form.placeholders.location} {...register('location')} />
+          </Field>
         </div>
+      </FormSection>
 
-        <div className="mt-6 grid gap-6 xl:grid-cols-2">
-          <Section
-            title="公司与岗位"
-            description="先把最重要的识别信息录清楚，确保看板和详情页都可读。"
+      <FormSection title={t.form.sections.pipeline}>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field label={t.form.fields.status}>
+            <Select
+              value={watch('currentStatus')}
+              onValueChange={(v) => setValue('currentStatus', v as never, { shouldDirty: true })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {APPLICATION_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {t.status[s]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label={t.form.fields.priority}>
+            <Select
+              value={watch('priority')}
+              onValueChange={(v) => setValue('priority', v as never, { shouldDirty: true })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PRIORITIES.map((p) => (
+                  <SelectItem key={p} value={p}>
+                    {t.priority[p]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label={t.form.fields.type}>
+            <Select
+              value={watch('employmentType')}
+              onValueChange={(v) =>
+                setValue('employmentType', v as never, { shouldDirty: true })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {EMPLOYMENT_TYPES.map((et) => (
+                  <SelectItem key={et} value={et}>
+                    {t.employmentType[et]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field
+            label={t.form.fields.deadline}
+            error={translateError(formState.errors.deadlineAt?.message, t)}
           >
-            <Field label="公司名" error={form.formState.errors.companyName?.message}>
-              <Input {...form.register("companyName")} />
-            </Field>
-            <Field label="岗位名称" error={form.formState.errors.title?.message}>
-              <Input {...form.register("title")} />
-            </Field>
-            <Field label="部门">
-              <Input {...form.register("department")} />
-            </Field>
-            <Field label="工作地点">
-              <Input {...form.register("location")} />
-            </Field>
-            <Field label="公司官网">
-              <Input {...form.register("companyWebsite")} />
-            </Field>
-            <Field label="行业">
-              <Input {...form.register("companyIndustry")} />
-            </Field>
-            <Field label="公司所在地">
-              <Input {...form.register("companyLocation")} />
-            </Field>
-          </Section>
-
-          <Section
-            title="状态与来源"
-            description="这些字段会驱动看板分区、总览风险判断和后续分析统计。"
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder="yyyy-mm-dd"
+              pattern="\d{4}-\d{2}-\d{2}"
+              autoComplete="off"
+              {...register('deadlineAt')}
+            />
+          </Field>
+          <Field
+            label={t.form.fields.appliedOn}
+            error={translateError(formState.errors.appliedAt?.message, t)}
           >
-            <Field label="当前状态">
-              <Select {...form.register("currentStatus")}>
-                {applicationStatuses.map((status) => (
-                  <option key={status} value={status}>
-                    {applicationStatusLabels[status]}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field label="优先级">
-              <Select {...form.register("priority")}>
-                {applicationPriorities.map((priority) => (
-                  <option key={priority} value={priority}>
-                    {applicationPriorityLabels[priority]}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field label="来源">
-              <Select {...form.register("source")}>
-                {applicationSources.map((source) => (
-                  <option key={source} value={source}>
-                    {applicationSourceLabels[source]}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field label="来源链接">
-              <Input {...form.register("sourceUrl")} />
-            </Field>
-            <Field label="岗位类型">
-              <Select {...form.register("employmentType")}>
-                {employmentTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {employmentTypeLabels[type]}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field label="内推人">
-              <Input {...form.register("referralName")} />
-            </Field>
-          </Section>
-
-          <Section
-            title="时间与薪资"
-            description="先把 deadline、投递时间和薪资预期记录下来，方便日历与后续 offer 对比复用。"
-          >
-            <Field label="截止日期">
-              <Input type="date" {...form.register("deadlineAt")} />
-            </Field>
-            <Field label="投递日期">
-              <Input type="date" {...form.register("appliedAt")} />
-            </Field>
-            <Field label="薪资下限">
-              <Input type="number" {...form.register("salaryMin")} />
-            </Field>
-            <Field label="薪资上限">
-              <Input type="number" {...form.register("salaryMax")} />
-            </Field>
-            <Field label="币种">
-              <Input {...form.register("salaryCurrency")} />
-            </Field>
-            <Field label="薪资周期">
-              <Select {...form.register("salaryPeriod")}>
-                {Object.entries(salaryPeriodLabels).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-          </Section>
-
-          <Section
-            title="备注"
-            description="记下你为什么投、当前风险点和下一步计划，详情页会直接复用这里的信息。"
-            className="xl:col-span-2"
-          >
-            <Field label="岗位备注">
-              <Textarea {...form.register("notes")} />
-            </Field>
-          </Section>
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder="yyyy-mm-dd"
+              pattern="\d{4}-\d{2}-\d{2}"
+              autoComplete="off"
+              {...register('appliedAt')}
+            />
+          </Field>
+          <Field label={t.form.fields.salaryRange}>
+            <Input placeholder={t.form.placeholders.salary} {...register('salaryRange')} />
+          </Field>
         </div>
+      </FormSection>
 
-        {state.error ? (
-          <p className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-950 dark:bg-rose-950/40 dark:text-rose-200">
-            {state.error}
-          </p>
-        ) : null}
-
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Button type="submit" disabled={isPending}>
-            {isPending ? "保存中..." : submitLabel}
-          </Button>
-          <Button type="button" variant="ghost" onClick={() => history.back()}>
-            返回上一页
-          </Button>
+      <FormSection title={t.form.sections.source}>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label={t.form.fields.source}>
+            <Input placeholder={t.form.placeholders.source} {...register('source')} />
+          </Field>
+          <Field
+            label={t.form.fields.sourceUrl}
+            error={translateError(formState.errors.sourceUrl?.message, t)}
+          >
+            <Input placeholder={t.form.placeholders.url} {...register('sourceUrl')} />
+          </Field>
+          <Field label={t.form.fields.referralName}>
+            <Input placeholder={t.form.placeholders.optional} {...register('referralName')} />
+          </Field>
         </div>
-      </Card>
+      </FormSection>
+
+      <FormSection title={t.form.sections.notes}>
+        <Field label={t.form.fields.notes}>
+          <Textarea rows={4} placeholder={t.form.placeholders.notes} {...register('notes')} />
+        </Field>
+      </FormSection>
+
+      <div className="flex items-center justify-end gap-2">
+        <Button type="button" variant="outline" onClick={() => router.back()}>
+          {t.form.actions.cancel}
+        </Button>
+        <Button type="submit" disabled={pending}>
+          {pending
+            ? t.form.actions.saving
+            : mode === 'create'
+              ? t.form.actions.create
+              : t.form.actions.save}
+        </Button>
+      </div>
     </form>
   );
 }
 
-function Section({
-  title,
-  description,
-  children,
-  className,
-}: {
-  title: string;
-  description: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
+function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className={className}>
-      <div className="space-y-1">
-        <h3 className="text-base font-semibold">{title}</h3>
-        <p className="text-sm leading-6 text-muted-foreground">{description}</p>
-      </div>
-      <div className="mt-4 grid gap-4 md:grid-cols-2">{children}</div>
+    <div className="space-y-4">
+      <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </h2>
+      {children}
     </div>
   );
 }
 
 function Field({
   label,
-  children,
   error,
+  children,
 }: {
   label: string;
-  children: React.ReactNode;
   error?: string;
+  children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <Label>{label}</Label>
       {children}
-      {error ? <p className="text-sm text-rose-600 dark:text-rose-300">{error}</p> : null}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }
