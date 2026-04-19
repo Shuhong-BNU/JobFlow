@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f4f6f8;
+  --foreground: #102033;
+  --card: #ffffff;
+  --card-foreground: #102033;
+  --muted: #e9eef3;
+  --muted-foreground: #5f6e80;
+  --primary: #1262f3;
+  --primary-foreground: #f8fbff;
+  --secondary: #e8f0ff;
+  --secondary-foreground: #123568;
+  --accent: #d9efe4;
+  --accent-foreground: #114735;
+  --destructive: #d53939;
+  --destructive-foreground: #fff7f7;
+  --border: rgba(16, 32, 51, 0.1);
+  --input: rgba(16, 32, 51, 0.12);
+  --ring: rgba(18, 98, 243, 0.4);
+  --success: #17835f;
+  --warning: #b57011;
+  --danger: #c43f3f;
+  --radius: 1rem;
+  --shadow-soft: 0 20px 60px rgba(18, 45, 80, 0.12);
+  --shadow-card: 0 16px 36px rgba(18, 45, 80, 0.08);
+  --background-rgb: 244 246 248;
+  --foreground-rgb: 16 32 51;
+  --card-rgb: 255 255 255;
+  --card-foreground-rgb: 16 32 51;
+  --muted-rgb: 233 238 243;
+  --muted-foreground-rgb: 95 110 128;
+  --primary-rgb: 18 98 243;
+  --primary-foreground-rgb: 248 251 255;
+  --secondary-rgb: 232 240 255;
+  --secondary-foreground-rgb: 18 53 104;
+  --accent-rgb: 217 239 228;
+  --accent-foreground-rgb: 17 71 53;
+  --destructive-rgb: 213 57 57;
+  --destructive-foreground-rgb: 255 247 247;
+  --border-rgb: 16 32 51;
+  --input-rgb: 16 32 51;
+  --ring-rgb: 18 98 243;
+}
+
+[data-theme="dark"] {
+  --background: #0d1622;
+  --foreground: #edf3ff;
+  --card: #121f31;
+  --card-foreground: #edf3ff;
+  --muted: #162335;
+  --muted-foreground: #9fb0c6;
+  --primary: #70a1ff;
+  --primary-foreground: #08111f;
+  --secondary: #152845;
+  --secondary-foreground: #cde0ff;
+  --accent: #143127;
+  --accent-foreground: #cbf7e5;
+  --destructive: #ff6d6d;
+  --destructive-foreground: #2a0d0d;
+  --border: rgba(237, 243, 255, 0.1);
+  --input: rgba(237, 243, 255, 0.12);
+  --ring: rgba(112, 161, 255, 0.45);
+  --shadow-soft: 0 20px 60px rgba(0, 0, 0, 0.35);
+  --shadow-card: 0 16px 36px rgba(0, 0, 0, 0.22);
+  --background-rgb: 13 22 34;
+  --foreground-rgb: 237 243 255;
+  --card-rgb: 18 31 49;
+  --card-foreground-rgb: 237 243 255;
+  --muted-rgb: 22 35 53;
+  --muted-foreground-rgb: 159 176 198;
+  --primary-rgb: 112 161 255;
+  --primary-foreground-rgb: 8 17 31;
+  --secondary-rgb: 21 40 69;
+  --secondary-foreground-rgb: 205 224 255;
+  --accent-rgb: 20 49 39;
+  --accent-foreground-rgb: 203 247 229;
+  --destructive-rgb: 255 109 109;
+  --destructive-foreground-rgb: 42 13 13;
+  --border-rgb: 237 243 255;
+  --input-rgb: 237 243 255;
+  --ring-rgb: 112 161 255;
+}
+
+* {
+  border-color: rgb(var(--border-rgb) / 0.1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(18, 98, 243, 0.12), transparent 35%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.4), transparent 18%),
+    var(--background);
+  color: var(--foreground);
+  font-family: "Aptos", "Segoe UI", "PingFang SC", "Noto Sans CJK SC",
+    "Microsoft YaHei", sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(18, 98, 243, 0.18);
+}
+
+.surface-card {
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid rgb(var(--border-rgb) / 0.1);
+  box-shadow: var(--shadow-card);
+}
+
+.surface-soft {
+  background: color-mix(in srgb, var(--card) 68%, transparent);
+  border: 1px solid rgb(var(--border-rgb) / 0.1);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-soft);
+}
+
+.page-shell {
+  width: min(1380px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(16, 32, 51, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(16, 32, 51, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.status-dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 999px;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--foreground);
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+button,
+input,
+select,
+textarea {
+  outline-color: rgb(var(--ring-rgb) / 0.4);
+}
+
+@media (max-width: 768px) {
+  .page-shell {
+    width: min(100% - 1rem, 100%);
+  }
+}

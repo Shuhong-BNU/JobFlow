@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: jobflow-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: jobflow
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - jobflow-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  jobflow-postgres-data:
