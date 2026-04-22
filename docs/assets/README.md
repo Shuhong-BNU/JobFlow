@@ -1,13 +1,13 @@
-# docs/assets
+# 🖼 docs/assets
 
 README 和其他文档引用的静态资源统一放在这里。
 
-## 目录
+## 📁 目录
 
 - `screenshots/`：产品界面截图，主要给 README、阶段文档、部署文档使用。
 - `diagrams/`：架构图、流程图、对比图等说明性素材。
 
-## 命名规范
+## 🏷 命名规范
 
 统一格式：
 
@@ -36,7 +36,7 @@ language-toggle.webp
 - `<locale>`：`zh` 或 `en`。主 README 优先使用中文截图；英文 README 可以先复用中文截图。
 - `<ext>`：静态截图推荐 `.png`，短动图推荐 `.webp`，只在必要时使用 `.gif`。
 
-## 分辨率与压缩
+## 📐 分辨率与压缩
 
 - 浏览器建议宽度：`1440px`
 - 导出建议：2x 截图，控制在 `2880px` 宽度以内
@@ -44,7 +44,7 @@ language-toggle.webp
 - 动图建议 `< 2 MB`
 - 动图时长建议 `3s - 8s`
 
-## README 引用方式
+## 🔗 README 引用方式
 
 Hero 图建议居中展示：
 
@@ -54,15 +54,24 @@ Hero 图建议居中展示：
 </p>
 ```
 
-截图区建议用 Markdown 表格，GitHub 渲染更稳定：
+截图区优先用 HTML `table + img`，宽度控制更稳，GitHub 首页展示也更直观：
 
-```md
-| Dashboard | Board | List |
-|---|---|---|
-| ![](docs/assets/screenshots/dashboard-light-zh.png) | ![](docs/assets/screenshots/board-light-zh.png) | ![](docs/assets/screenshots/list-light-zh.png) |
+```html
+<table>
+  <tr>
+    <td align="center"><strong>Dashboard</strong></td>
+    <td align="center"><strong>Board</strong></td>
+    <td align="center"><strong>List</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./docs/assets/screenshots/dashboard-light-zh.png" alt="Dashboard" width="100%"></td>
+    <td><img src="./docs/assets/screenshots/board-light-zh.png" alt="Board" width="100%"></td>
+    <td><img src="./docs/assets/screenshots/list-light-zh.png" alt="List" width="100%"></td>
+  </tr>
+</table>
 ```
 
-## 截图清单
+## 📸 截图清单
 
 ### 1. `landing-light-zh.png`
 
@@ -118,7 +127,7 @@ Hero 图建议居中展示：
 - 建议内容：同一页面点击按钮后，文案切换前后对比。
 - 注意：优先录成短 `webp` 动图；如果不方便，也可以做一张左右拼图。
 
-## 拍图前的小检查
+## ✅ 拍图前的小检查
 
 - 统一使用浅色主题作为 README 主图。
 - 优先使用中文界面，和中文主 README 保持一致。

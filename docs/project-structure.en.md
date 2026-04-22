@@ -1,11 +1,13 @@
-# Project structure
+# 🗂 Project structure
 
 > Constraint: the directory layout and root-level config files are frozen together with the Phase 1 scaffold. **Do not move root-level config files** (`next.config.mjs`, `tsconfig.json`, `tailwind.config.ts`, `postcss.config.mjs`, `drizzle.config.ts`, `middleware.ts`). Next.js and the surrounding tooling look for them at the repo root — moving them forces config changes in many places.
 
-## Root (configs + entry points)
+## 📍 Root (configs + entry points)
 
 | File | Purpose | Notes |
 |---|---|---|
+| `README.md` | Primary Chinese README | Default repo landing document |
+| `README.en.md` | English README | Kept in sync with the Chinese version |
 | `package.json` | Dependencies and scripts | `dev / dev:doctor / dev:setup / dev:start / build / lint / typecheck / db:*` |
 | `package-lock.json` | Dependency lock | Checked in |
 | `next.config.mjs` | Next.js config | No custom webpack — keep it minimal |
@@ -17,8 +19,9 @@
 | `components.json` | shadcn/ui generator config | Points at `components/ui` |
 | `next-env.d.ts` | Next.js type declarations | Auto-generated, do not hand-edit |
 | `.env / .env.example` | Environment variables | Real values go in `.env`; the example + explanations live in `.env.example` |
+| `.jobflow/` | Local development state cache | `dev:setup` tracks whether the current DB has been initialized |
 
-## Top-level directories
+## 🧱 Top-level directories
 
 ```
 app/                  # Next.js App Router — routes + layouts
@@ -90,10 +93,15 @@ scripts/              # Dev / ops scripts
 └── ...
 
 types/                # Global types
-docs/                 # Documentation
+docs/                 # Chinese-first docs, English mirrors, and asset notes
+├── assets/           # Screenshot and static asset guidance
+├── deployment*.md    # Deployment guides
+├── phase-1*.md       # Phase 1 notes
+├── project-structure*.md # Project structure guides
+└── ...               # roadmap / faq / assessments and more
 ```
 
-## Organization principles
+## 🧭 Organization principles
 
 1. **`features/<domain>/` is the primary unit for business code.** `actions.ts + queries.ts + schema.ts + components/` stay together; do not split them into `app/` just to populate a folder.
 2. **`lib/` holds no business code** — only cross-domain, UI-agnostic utilities.
@@ -102,7 +110,7 @@ docs/                 # Documentation
 5. **`lib/enums.ts` is the only source of truth for enums.** DB schema, zod, UI all read from it.
 6. **`lib/i18n/dictionaries/zh.ts` is the source of truth for copy.** `en.ts` is constrained by the `Dictionary` type and must mirror the key shape.
 
-## Path alias
+## 🔗 Path alias
 
 `tsconfig.json` defines a single alias:
 
@@ -112,14 +120,14 @@ docs/                 # Documentation
 
 All imports use `@/features/...`, `@/components/...`, `@/lib/...`. Do not write relative imports that climb more than one level.
 
-## Things not to do
+## ⛔ Things not to do
 
 - **Do not put hooks or queries inside `app/`.** They belong in `features/<domain>/`.
 - **Do not hardcode user-visible text in components.** Go through the dictionary.
 - **Do not bypass server actions and hit the DB from the client.** It breaks ownership checks and future RLS.
 - **Do not move root-level config files.** Next.js, drizzle-kit, Tailwind, and tsconfig all look for them at the root. See the next section for why.
 
-## Why the root-level config files stay at the root
+## 🧠 Why the root-level config files stay at the root
 
 This is the textbook "looks messy but shouldn't be tidied" case in JobFlow. Below is every file, the convention that pins it to the root, and the price of moving it.
 

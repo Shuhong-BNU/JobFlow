@@ -1,8 +1,8 @@
-# Roadmap
+# 🗺 Roadmap
 
 Managing a job search isn't a one-shot project. This roadmap uses status words instead of promises — it tells you what JobFlow ships today, what's planned next, and what it won't do.
 
-## At a Glance
+## 👀 At a Glance
 
 | Module | Phase | Status | Value | Docs |
 |---|---|---|---|---|
@@ -16,13 +16,13 @@ Managing a job search isn't a one-shot project. This roadmap uses status words i
 
 ---
 
-## Now — Phase 1 (Shipping)
+## 🚀 Now — Phase 1 (Shipping)
 
 A single board covering the full pipeline — wishlist → applied → OA → interview → HR → offer → rejected → archived — with a Dashboard summary, list filters, detail timeline, and bilingual + theme toggles. Date picking, required-field hints, and a startup self-check are all in place.
 
 Details in [phase-1.en.md](./phase-1.en.md).
 
-## Also Shipping — Phase 2
+## 📦 Planned Phase — Phase 2
 
 Phase 2 shipped in three milestones: v0.2.0 (progress view + deployment support), v0.3.0 (Offers + Calendar + Analytics), v0.4.0 (Materials).
 
@@ -35,7 +35,7 @@ Full shipping notes in [phase-2.en.md](./phase-2.en.md). The original plan remai
 
 ---
 
-## Next — Phase 3 (Planned / Exploring)
+## 🔭 Next — Phase 3 (Planned / Exploring)
 
 ### Material file uploads (Planned)
 **Capability.** Host material file bytes in Supabase Storage so the product doesn't depend on external links.
@@ -53,15 +53,15 @@ Requires `application_status_history` or event replay. Deliberately out of v1.
 
 ---
 
-## Later — Phase 4+ (Exploring)
+## 🧪 Later — Phase 4+ (Exploring)
 
-> No timeline commitments. These are here to describe where the product boundary is heading, not a development schedule.
+> No release commitment yet. This section only keeps the direction and product boundary visible.
 
 - **Gmail ingestion (read-only).** Auto-identify OA invites / interview invites / rejections / offer emails and file them onto the matching application's timeline. **No auto-apply. No auto-reply.**
 
 ---
 
-## Non-goals
+## ⛔ Non-goals
 
 - No multi-user collaboration. JobFlow is a single-person job-search record.
 - No recruiter-side view (ATS, JD publishing).
@@ -71,6 +71,6 @@ Requires `application_status_history` or event replay. Deliberately out of v1.
 
 ---
 
-## Feedback
+## 💬 Feedback
 
 This roadmap welcomes pushback. Open an Issue for disagreements, or start a Discussion if you have a better way to write a public roadmap.

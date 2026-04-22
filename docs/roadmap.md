@@ -1,8 +1,8 @@
-# Roadmap
+# 🗺 Roadmap
 
 求职进度管理不是一次性工程。下面这份路线图用状态词而不是承诺，标明 JobFlow 当前在做什么、下一步打算做什么、哪些事不会做。
 
-## At a Glance
+## 👀 当前一览
 
 | 模块 | 阶段 | 状态 | 价值主张 | 详细文档 |
 |---|---|---|---|---|
@@ -17,13 +17,13 @@
 
 ---
 
-## Now — Phase 1（Shipping）
+## 🚀 当前版本 — Phase 1（Shipping）
 
 一块看板管完 wishlist → applied → OA → interview → HR → offer → rejected → archived 全流程，配 Dashboard 汇总、列表筛选、详情时间线、双语切换。日期选择、必填提示、启动自检都已到位。
 
 详见 [phase-1.md](./phase-1.md)。
 
-## Also Shipping — Phase 2
+## 📦 已规划版本 — Phase 2
 
 Phase 2 分三轮冻结：v0.2.0（进度视图 + 部署支持）、v0.3.0（Offers + Calendar + Analytics）、v0.4.0（Materials）。
 
@@ -36,7 +36,7 @@ Phase 2 分三轮冻结：v0.2.0（进度视图 + 部署支持）、v0.3.0（Off
 
 ---
 
-## Next — Phase 3（Planned / Exploring）
+## 🔭 下一阶段 — Phase 3（Planned / Exploring）
 
 ### Materials 文件上传（Planned）
 **能力目标**：把材料正文托管到 Supabase Storage，摆脱外链依赖。
@@ -54,15 +54,15 @@ Phase 2 分三轮冻结：v0.2.0（进度视图 + 部署支持）、v0.3.0（Off
 
 ---
 
-## Later — Phase 4+（Exploring）
+## 🧪 后续方向 — Phase 4+（Exploring）
 
-> 没有承诺时间线。列在这里是为了说明产品边界走向，不是开发计划。
+> 暂无发布时间承诺，仅保留方向边界与优先级参考。
 
 - **Gmail 邮件识别（read-only）**：自动识别 OA 邀请 / 面试邀请 / 拒信 / offer 邮件，归到对应申请的时间线。**不做自动投递、不做自动回复**。
 
 ---
 
-## Non-goals
+## ⛔ Non-goals
 
 - 不做多用户协作。JobFlow 的模型是"一个人的求职档案"。
 - 不做招聘方视角（ATS / JD 发布）。
@@ -72,6 +72,6 @@ Phase 2 分三轮冻结：v0.2.0（进度视图 + 部署支持）、v0.3.0（Off
 
 ---
 
-## Feedback
+## 💬 Feedback
 
 路线图欢迎挑战。有意见开 Issue，有更好的 roadmap 写法也欢迎在 Discussions 里讨论。

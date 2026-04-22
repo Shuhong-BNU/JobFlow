@@ -1,11 +1,13 @@
-# 项目结构说明
+# 🗂 项目结构说明
 
 > 约束：目录与根目录配置文件由脚手架与 Phase 1 一起冻结。**不要随意移动根目录配置文件的位置**（`next.config.mjs` / `tsconfig.json` / `tailwind.config.ts` / `postcss.config.mjs` / `drizzle.config.ts` / `middleware.ts`），Next.js 与各工具默认在根目录读它们，移到子目录需要改一大串配置。
 
-## 根目录（configs + entry points）
+## 📍 根目录（configs + entry points）
 
 | 文件 | 作用 | 备注 |
 |---|---|---|
+| `README.md` | 中文主文档 | 仓库首页默认展示 |
+| `README.en.md` | 英文版 README | 与中文文档保持同版更新 |
 | `package.json` | 依赖与脚本 | `dev / dev:doctor / dev:setup / dev:start / build / lint / typecheck / db:*` |
 | `package-lock.json` | 锁定依赖版本 | 直接提交到仓库 |
 | `next.config.mjs` | Next.js 配置 | 无自定义 webpack，保持最小配置 |
@@ -17,8 +19,9 @@
 | `components.json` | shadcn/ui 生成器配置 | 指向 `components/ui` |
 | `next-env.d.ts` | Next.js 类型声明 | 自动生成，不要手改 |
 | `.env / .env.example` | 环境变量 | 真实值只写 `.env`，示例与说明放 `.env.example` |
+| `.jobflow/` | 本地开发状态缓存 | `dev:setup` 记录数据库是否初始化过 |
 
-## 一级目录
+## 🧱 一级目录
 
 ```
 app/                  # Next.js App Router — 路由 + layout
@@ -90,11 +93,15 @@ scripts/              # 开发 / 运维脚本
 └── ...               # 其他一次性脚本
 
 types/                # 全局类型（不按业务域分）
-docs/                 # 文档
-└── ...               # phase-1 / phase-2-plan / project-structure / nextjs-upgrade-assessment
+docs/                 # 中文主文档、英文镜像与素材说明
+├── assets/           # 截图与静态资源规范
+├── deployment*.md    # 部署说明
+├── phase-1*.md       # Phase 1 记录
+├── project-structure*.md # 项目结构说明
+└── ...               # roadmap / faq / assessment 等补充文档
 ```
 
-## 代码组织原则
+## 🧭 代码组织原则
 
 1. **`features/<domain>/` 是业务代码的主单位**：`actions.ts + queries.ts + schema.ts + components/` 聚在一起，不要为了凑目录而拆到 `app/` 里。
 2. **`lib/` 不放业务代码**，只放跨业务域、与 UI 无关的工具。
@@ -103,7 +110,7 @@ docs/                 # 文档
 5. **`lib/enums.ts` 是枚举的唯一真源**：DB schema / zod / UI 全部从这里引用，避免漂移。
 6. **`lib/i18n/dictionaries/zh.ts` 是文案的唯一真源**，`en.ts` 用 `Dictionary` 类型约束必须对齐；任何新文案都先落到这两个字典。
 
-## 路径别名
+## 🔗 路径别名
 
 `tsconfig.json` 里只有一条别名：
 
@@ -113,14 +120,14 @@ docs/                 # 文档
 
 所有 import 用 `@/features/...` / `@/components/...` / `@/lib/...`，不要写相对路径翻越两级以上。
 
-## 不要做的事情
+## ⛔ 不要做的事情
 
 - **不要在 `app/` 里写业务 hooks 或 queries**：它们必须落在 `features/<domain>/`。
 - **不要把 i18n 文案写死在组件里**：一律走字典。
 - **不要绕开 server actions 直接在 client 写 DB 操作**：会破坏 ownership 校验与后续的 RLS 接入。
 - **不要移动根目录配置文件**：Next.js / drizzle-kit / tailwind / tsconfig 都默认在根目录找它们，挪一次改一堆路径。详见下一节。
 
-## 为什么根目录配置文件必须留在根
+## 🧠 为什么根目录配置文件必须留在根
 
 这是 JobFlow 里"看起来乱但不能整理"的典型场景。下表罗列每个文件为什么必须在根，把它移走要付出的代价是什么。
 

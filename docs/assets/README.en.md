@@ -1,13 +1,13 @@
-# docs/assets
+# 🖼 docs/assets
 
 This folder stores static assets referenced by the README and other docs.
 
-## Directories
+## 📁 Directories
 
 - `screenshots/`: product UI captures for the README, phase notes, and deployment docs
 - `diagrams/`: architecture diagrams, flow charts, and comparison visuals
 
-## Naming Convention
+## 🏷 Naming Convention
 
 Use this format:
 
@@ -36,7 +36,7 @@ Field rules:
 - `<locale>`: `zh` or `en`; the main README can use Chinese screenshots first, and the English README can reuse them until dedicated English shots are ready
 - `<ext>`: use `.png` for static captures, `.webp` for short motion clips, and `.gif` only if needed
 
-## Resolution and Compression
+## 📐 Resolution and Compression
 
 - Recommended browser width: `1440px`
 - Export target: 2x captures, ideally within `2880px` width
@@ -44,7 +44,7 @@ Field rules:
 - Motion clip target: `< 2 MB`
 - Suggested motion duration: `3s - 8s`
 
-## Referencing Assets in the README
+## 🔗 Referencing Assets in the README
 
 Center the hero image:
 
@@ -54,15 +54,24 @@ Center the hero image:
 </p>
 ```
 
-Use a Markdown table for the screenshot gallery because GitHub renders it reliably:
+Prefer an HTML `table + img` gallery so widths stay predictable on GitHub:
 
-```md
-| Dashboard | Board | List |
-|---|---|---|
-| ![](docs/assets/screenshots/dashboard-light-zh.png) | ![](docs/assets/screenshots/board-light-zh.png) | ![](docs/assets/screenshots/list-light-zh.png) |
+```html
+<table>
+  <tr>
+    <td align="center"><strong>Dashboard</strong></td>
+    <td align="center"><strong>Board</strong></td>
+    <td align="center"><strong>List</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./docs/assets/screenshots/dashboard-light-zh.png" alt="Dashboard" width="100%"></td>
+    <td><img src="./docs/assets/screenshots/board-light-zh.png" alt="Board" width="100%"></td>
+    <td><img src="./docs/assets/screenshots/list-light-zh.png" alt="List" width="100%"></td>
+  </tr>
+</table>
 ```
 
-## Screenshot Checklist
+## 📸 Screenshot Checklist
 
 ### 1. `landing-light-zh.png`
 
@@ -118,7 +127,7 @@ Use a Markdown table for the screenshot gallery because GitHub renders it reliab
 - Suggested content: a short before/after clip on the same page
 - Note: a side-by-side comparison image also works if motion capture is inconvenient
 
-## Before You Capture
+## ✅ Before You Capture
 
 - Use the light theme for the main README gallery.
 - Prefer Chinese UI for the primary screenshot set so it matches the Chinese README.

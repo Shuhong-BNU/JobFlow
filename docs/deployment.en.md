@@ -2,7 +2,16 @@
 
 JobFlow deploys on two principles: local development self-checks itself to green, and production needs exactly two env vars changed to go live. This doc walks scenarios; developer-side FAQs live in [faq.en.md](./faq.en.md).
 
-## Local Development
+## 🌍 Live Demo
+
+- Public site: `https://job-flow-sandy.vercel.app/`
+- Demo account: `demo@jobflow.local / demo1234`
+- Long Vercel-generated domains are deployment snapshots for a specific release, not the main public URL
+- If the production domain changes later, update `AUTH_URL` and redeploy
+
+---
+
+## 🧪 Local Development
 
 **Prerequisites.** Node 18+ (20 LTS recommended), npm 9+, a reachable Postgres (Supabase or local).
 
@@ -36,7 +45,7 @@ demo@jobflow.local / demo1234
 
 ---
 
-## Environment Variables
+## 🔐 Environment Variables
 
 `.env.example` groups variables by phase: Phase 1 required, Phase 2 reserved, Phase 3 reserved.
 
@@ -57,7 +66,7 @@ Leave Phase 2 / 3 vars empty during Phase 1. Startup won't validate them.
 
 ---
 
-## Supabase Setup
+## 🗄 Supabase Setup
 
 1. Create a project at [supabase.com](https://supabase.com), pick a region close to your users.
 2. Settings → Database → Connection string — grab both:
@@ -77,7 +86,7 @@ Leave Phase 2 / 3 vars empty during Phase 1. Startup won't validate them.
 
 ---
 
-## Production Build
+## 🏗 Production Build
 
 ```bash
 npm run build   # emits static + server bundle to .next/
@@ -92,7 +101,7 @@ In production:
 
 ---
 
-## Deploy to Vercel
+## ▲ Deploy to Vercel
 
 JobFlow is Next.js 14 App Router — Vercel just works.
 
@@ -107,7 +116,7 @@ JobFlow is Next.js 14 App Router — Vercel just works.
 
 ---
 
-## Public demo deployment
+## 🧪 Public Demo Deployment
 
 A public-facing JobFlow demo is a different shape from a production deployment — production is single-user and trusts whoever logs in. For demos you have to think about:
 
@@ -126,7 +135,7 @@ A public-facing JobFlow demo is a different shape from a production deployment �
 
 ---
 
-## Self-hosted
+## 🖥 Self-hosted
 
 Any Node 18+ host works:
 
@@ -139,7 +148,7 @@ No shipped Dockerfile — user setups vary too much (co-located Postgres? proxy 
 
 ---
 
-## Common Errors
+## 🚨 Common Errors
 
 | Symptom | Cause | Fix |
 |---|---|---|
