@@ -48,15 +48,13 @@ Public deployment URL coming soon. Want to spin up your own demo site? See [Depl
 
 ## Screenshots
 
-<!-- TODO: docs/assets/screenshots/dashboard-light-zh.png / board-light-zh.png / list-light-zh.png / detail-light-zh.png / timeline-light-zh.png / landing-light-zh.png -->
-
 | Dashboard | Board | List |
 |---|---|---|
-| <sub>`docs/assets/screenshots/dashboard-light-zh.png`</sub> | <sub>`docs/assets/screenshots/board-light-zh.png`</sub> | <sub>`docs/assets/screenshots/list-light-zh.png`</sub> |
+| ![](docs/assets/screenshots/dashboard-light-zh.png) | ![](docs/assets/screenshots/board-light-zh.png) | ![](docs/assets/screenshots/list-light-zh.png) |
 
 | Detail | Timeline | Landing |
 |---|---|---|
-| <sub>`docs/assets/screenshots/detail-light-zh.png`</sub> | <sub>`docs/assets/screenshots/timeline-light-zh.png`</sub> | <sub>`docs/assets/screenshots/landing-light-zh.png`</sub> |
+| ![](docs/assets/screenshots/detail-light-zh.png) | ![](docs/assets/screenshots/timeline-light-zh.png) | ![](docs/assets/screenshots/landing-light-zh.png) |
 
 ### Screenshot plan
 
