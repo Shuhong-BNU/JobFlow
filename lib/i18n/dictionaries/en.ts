@@ -167,6 +167,16 @@ export const en = {
       deadline: 'Deadline',
       updated: 'Updated',
     },
+    view: {
+      label: 'View',
+      table: 'Table',
+      progress: 'Progress',
+    },
+    progress: {
+      openPosting: 'Open job posting',
+      deadlinePrefix: 'Due ',
+      updatedPrefix: 'Updated ',
+    },
   },
   filterBar: {
     searchPlaceholder: 'Search company or role...',
@@ -239,12 +249,12 @@ export const en = {
     },
     placeholders: {
       company: 'Meituan',
-      title: 'Backend Engineer Intern',
-      department: 'e.g. Payments',
-      location: 'Remote / Beijing',
-      salary: '$30/hr',
-      source: 'LinkedIn / Referral / Career fair',
-      url: 'https://',
+      title: 'Backend Development Intern',
+      department: 'e.g. Payments / Local Services',
+      location: 'Beijing / Shenzhen',
+      salary: 'CNY 4k-6k / month',
+      source: 'Official careers / Referral / BOSS Zhipin',
+      url: 'https://zhaopin.meituan.com/',
       optional: 'Optional',
       notes: 'Notes, follow-ups, interview feedback...',
     },
@@ -274,7 +284,7 @@ export const en = {
       title: 'Add event',
       type: 'Type',
       eventTitle: 'Title',
-      titlePlaceholder: 'Phone screen with Alex',
+      titlePlaceholder: 'First-round interview with a Meituan hiring manager',
       when: 'When',
       notes: 'Notes',
       submit: 'Add event',
@@ -296,10 +306,6 @@ export const en = {
     notBuiltDesc: 'Phase 1 stays focused on the board, list, overview, and application details.',
     pages: {
       ai: 'AI Inbox',
-      analytics: 'Analytics',
-      calendar: 'Calendar',
-      materials: 'Materials',
-      offers: 'Offers',
       settings: 'Settings',
     },
     phase2: 'Phase 2',
@@ -374,52 +380,150 @@ export const en = {
       dec: 'Dec',
     },
   },
-  phase2Plans: {
-    footnote:
-      'These capabilities belong to the Phase 2 roadmap. Phase 1 still focuses on application tracking — switch back to the board or list to keep moving.',
-    calendar: {
-      title: 'Calendar view',
-      subtitle:
-        'Deadlines, assessments, interviews, and offer responses laid out on one month or week view so the rhythm stays visible.',
-      points: {
-        one: 'Switch freely between month and week views across every application.',
-        two: 'Merge deadlines with timeline events and surface overlaps automatically.',
-        three: 'Drag to reschedule and the matching application timeline stays in sync.',
-        four: 'Filter by company, status, or priority to focus on what matters today.',
-      },
+  calendarPage: {
+    title: 'Calendar',
+    subtitle: 'Deadlines, assessments, interviews, and offer responses on one month grid.',
+    today: 'Today',
+  },
+  analyticsPage: {
+    title: 'Analytics',
+    subtitle: 'Honest facts only — the funnel counts current status, no event replay.',
+    empty: {
+      title: 'Nothing to analyze yet',
+      desc: 'Add your first application and the numbers will start showing up here.',
     },
-    materials: {
-      title: 'Materials library',
-      subtitle:
-        'One home for resumes, cover letters, and portfolios — and a clear record of which version went to which role.',
-      points: {
-        one: 'Upload with version labels so you never overwrite a file silently.',
-        two: 'Group by type: resume, cover letter, portfolio, transcript, certificate.',
-        three: 'Bind materials to an application and review what was actually sent.',
-        four: 'Flag stale or unused materials so old versions stop leaking out.',
-      },
+    kpi: {
+      total: 'Total',
+      waiting: 'Waiting',
+      rejected: 'Rejected',
+      archived: 'Archived',
+      avgDaysPrefix: 'Avg ',
+      daysSuffix: 'days',
     },
-    offers: {
-      title: 'Offer comparison',
-      subtitle:
-        'When multiple offers arrive, compare compensation, deadlines, locations, and key terms side by side.',
-      points: {
-        one: 'Aggregate every application in the offer column into a single comparison table.',
-        two: 'Capture base, bonus, location, team, and response deadline explicitly.',
-        three: 'Record pros and cons per offer so the decision path stays documented.',
-        four: 'Surface offers approaching their response deadline on the dashboard.',
-      },
+    funnel: {
+      title: 'Funnel',
+      hint: 'Cumulative by current status · excludes rejected / archived',
     },
-    analytics: {
-      title: 'Analytics',
-      subtitle:
-        'Read the rhythm of your search — funnel, wait times, and channel effectiveness — to target the next batch.',
-      points: {
-        one: 'Status funnel: wishlist → applied → OA → interview → offer, with pass rates visible.',
-        two: 'Wait-time distribution: see average days between each stage.',
-        three: 'Channel effectiveness: response rate by source so strong channels are obvious.',
-        four: 'Weekly activity pulse to help keep a steady submission pace.',
-      },
+    sources: {
+      title: 'Sources',
+      empty: 'No source channels recorded yet.',
     },
+    waiting: {
+      title: 'Still waiting',
+      count: 'Count',
+      avg: 'Average wait',
+      max: 'Longest wait',
+      empty: 'No applications stuck in Applied or OA.',
+      note: 'Scope: current status ∈ {Applied, OA} with a non-empty applied-on date. Days measured from applied-on to today.',
+    },
+  },
+  materialType: {
+    resume: 'Resume',
+    cover_letter: 'Cover letter',
+    portfolio: 'Portfolio',
+    transcript: 'Transcript',
+    certificate: 'Certificate',
+    other: 'Other',
+  },
+  materialsPage: {
+    title: 'Materials library',
+    subtitle:
+      'Resumes, cover letters, portfolios — tracked here; the files themselves live at external URLs.',
+    new: 'New material',
+    newTitle: 'New material',
+    listEmpty: {
+      title: 'No materials yet',
+      desc: 'Register a resume or cover letter you use often so you can attach it to future applications.',
+    },
+    emptyFiltered: {
+      title: 'Nothing under this type',
+      desc: 'Clear the filter or add a new material of this type.',
+    },
+    filter: {
+      all: 'All',
+    },
+    fields: {
+      type: 'Type',
+      name: 'Name',
+      version: 'Version',
+      fileUrl: 'File link',
+      tags: 'Tags',
+      notes: 'Notes',
+    },
+    placeholders: {
+      name: 'e.g. Spring 2026 general resume',
+      version: 'v3 / 2026.04',
+      fileUrl: 'https://... (Aliyun Drive / Tencent Docs / self-hosted)',
+      tags: 'Comma-separated: backend, tailored',
+      notes: 'Which company it was tailored for, key bullets...',
+    },
+    hints: {
+      tags: 'Separate multiple tags with commas',
+    },
+    errors: {
+      invalidUrl: 'Invalid URL',
+    },
+    toast: {
+      created: 'Material added',
+      saved: 'Material saved',
+      deleted: 'Material deleted',
+      attached: 'Attached to this application',
+      detached: 'Removed from this application',
+    },
+    confirmDelete: 'Delete this material? Applications that had it attached will be unbound.',
+    updatedPrefix: 'Updated ',
+    detail: {
+      empty: {
+        title: 'No materials attached yet',
+        desc: 'Attach a resume or cover letter so you remember which version you actually sent.',
+      },
+      libraryEmpty: 'The library is still empty. Add a material first, then come back to attach it.',
+      attach: 'Attach material',
+      pickMaterial: 'Pick material',
+      purpose: 'Purpose',
+      purposePlaceholder: 'Submitted / revised / appendix...',
+      openFile: 'Open link',
+    },
+  },
+  offers: {
+    pageTitle: 'Offer comparison',
+    pageSubtitle: 'Compare salary, location, team, and decision deadlines side by side.',
+    listEmpty: {
+      title: 'No offers yet',
+      desc: 'Add your first offer from an application detail page and it will show up here.',
+    },
+    empty: {
+      desc: 'No offer recorded for this application yet. Add one once you have a verbal or written offer.',
+      action: 'Add offer',
+    },
+    fields: {
+      baseSalary: 'Base salary',
+      bonus: 'Bonus / Equity',
+      location: 'Location',
+      team: 'Team',
+      responseDeadlineAt: 'Response deadline',
+      decisionStatus: 'Status',
+      pros: 'Pros',
+      cons: 'Concerns',
+    },
+    placeholders: {
+      baseSalary: 'CNY 350k-450k / year',
+      bonus: 'Sign-on / equity / annual',
+      location: 'Beijing · Wangjing',
+      team: 'Local Services / Ads Platform',
+      pros: 'What makes this offer attractive',
+      cons: 'What gives you pause',
+    },
+    decision: {
+      pending: 'Pending',
+      accepted: 'Accepted',
+      declined: 'Declined',
+      expired: 'Expired',
+    },
+    toast: {
+      saved: 'Offer saved',
+      deleted: 'Offer deleted',
+    },
+    confirmDelete: 'Delete this offer?',
   },
 } satisfies Dictionary;

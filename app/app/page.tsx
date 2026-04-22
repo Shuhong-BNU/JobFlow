@@ -237,7 +237,7 @@ function Stat({
   return (
     <Card>
       <CardContent className="p-5">
-        <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
         <p
           className={cn(
             'mt-1 text-3xl font-semibold',

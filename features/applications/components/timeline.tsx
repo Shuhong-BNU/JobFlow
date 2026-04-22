@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { DateTimePicker } from '@/components/datetime-picker';
 import { EVENT_TYPES, NOTE_TYPES, type EventType, type NoteType } from '@/lib/enums';
 import { formatDateTime } from '@/lib/date';
 import { useT, useLocale } from '@/lib/i18n/client';
@@ -174,33 +175,58 @@ function AddEvent({ applicationId }: { applicationId: string }) {
   const t = useT();
   const [pending, startTransition] = useTransition();
   const [eventType, setEventType] = useState<EventType>('interview');
+  const [title, setTitle] = useState('');
+  const [startsAt, setStartsAt] = useState('');
+  const [description, setDescription] = useState('');
+  const [titleError, setTitleError] = useState(false);
+  const [startsAtError, setStartsAtError] = useState(false);
+
+  /** 校验 "yyyy-mm-dd HH:mm" 并返回 Date；失败返回 undefined。 */
+  function parseDateTime(s: string): Date | undefined {
+    const m = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})$/.exec(s.trim());
+    if (!m) return undefined;
+    const dt = new Date(
+      Number(m[1]),
+      Number(m[2]) - 1,
+      Number(m[3]),
+      Number(m[4]),
+      Number(m[5])
+    );
+    return Number.isNaN(dt.getTime()) ? undefined : dt;
+  }
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = e.currentTarget;
-    const data = new FormData(form);
+    const trimmedTitle = title.trim();
+    const parsedStart = parseDateTime(startsAt);
+    const bad = { title: !trimmedTitle, start: !parsedStart };
+    setTitleError(bad.title);
+    setStartsAtError(bad.start);
+    if (bad.title || bad.start) return;
+
     startTransition(async () => {
       const res = await createEvent({
         applicationId,
         eventType,
-        title: String(data.get('title') ?? ''),
-        startsAt: new Date(String(data.get('startsAt') ?? '')),
-        description: String(data.get('description') ?? '') || undefined,
+        title: trimmedTitle,
+        startsAt: parsedStart!,
+        description: description.trim() || undefined,
       });
       if (!res.ok) {
         toast.error(translateActionError(res.error, t));
         return;
       }
       toast.success(t.timeline.addEvent.toast);
-      form.reset();
+      setTitle('');
+      setStartsAt('');
+      setDescription('');
     });
   }
 
   return (
     <form onSubmit={onSubmit} className="space-y-3">
       <p className="text-sm font-semibold">{t.timeline.addEvent.title}</p>
-      <div className="space-y-2">
-        <Label>{t.timeline.addEvent.type}</Label>
+      <FieldRow label={t.timeline.addEvent.type}>
         <Select value={eventType} onValueChange={(v) => setEventType(v as EventType)}>
           <SelectTrigger>
             <SelectValue />
@@ -213,23 +239,77 @@ function AddEvent({ applicationId }: { applicationId: string }) {
             ))}
           </SelectContent>
         </Select>
-      </div>
-      <div className="space-y-2">
-        <Label>{t.timeline.addEvent.eventTitle}</Label>
-        <Input name="title" required placeholder={t.timeline.addEvent.titlePlaceholder} />
-      </div>
-      <div className="space-y-2">
-        <Label>{t.timeline.addEvent.when}</Label>
-        <Input name="startsAt" type="datetime-local" required />
-      </div>
-      <div className="space-y-2">
-        <Label>{t.timeline.addEvent.notes}</Label>
-        <Textarea name="description" rows={2} />
-      </div>
+      </FieldRow>
+      <FieldRow
+        label={t.timeline.addEvent.eventTitle}
+        required
+        error={titleError ? t.form.errors.required : undefined}
+      >
+        <Input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          aria-invalid={titleError}
+          placeholder={t.timeline.addEvent.titlePlaceholder}
+        />
+      </FieldRow>
+      <FieldRow
+        label={t.timeline.addEvent.when}
+        required
+        error={startsAtError ? t.form.errors.required : undefined}
+      >
+        <DateTimePicker
+          value={startsAt}
+          onChange={setStartsAt}
+          ariaInvalid={startsAtError}
+        />
+      </FieldRow>
+      <FieldRow
+        label={t.timeline.addEvent.notes}
+        optional
+        optionalText={t.form.hints.optional}
+      >
+        <Textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={2}
+        />
+      </FieldRow>
       <Button type="submit" size="sm" className="w-full" disabled={pending}>
         {pending ? t.timeline.addEvent.submitting : t.timeline.addEvent.submit}
       </Button>
     </form>
+  );
+}
+
+function FieldRow({
+  label,
+  required,
+  optional,
+  optionalText,
+  error,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  optional?: boolean;
+  optionalText?: string;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-baseline justify-between gap-2">
+        <Label>
+          {label}
+          {required && <span className="ml-1 text-destructive">*</span>}
+        </Label>
+        {optional && optionalText && (
+          <span className="text-[11px] text-muted-foreground">{optionalText}</span>
+        )}
+      </div>
+      {children}
+      {error && <p className="text-xs text-destructive">{error}</p>}
+    </div>
   );
 }
 
@@ -260,8 +340,7 @@ function AddNote({ applicationId }: { applicationId: string }) {
   return (
     <form onSubmit={onSubmit} className="space-y-3">
       <p className="text-sm font-semibold">{t.timeline.addNote.title}</p>
-      <div className="space-y-2">
-        <Label>{t.timeline.addNote.type}</Label>
+      <FieldRow label={t.timeline.addNote.type}>
         <Select value={noteType} onValueChange={(v) => setNoteType(v as NoteType)}>
           <SelectTrigger>
             <SelectValue />
@@ -274,11 +353,10 @@ function AddNote({ applicationId }: { applicationId: string }) {
             ))}
           </SelectContent>
         </Select>
-      </div>
-      <div className="space-y-2">
-        <Label>{t.timeline.addNote.content}</Label>
+      </FieldRow>
+      <FieldRow label={t.timeline.addNote.content} required>
         <Textarea name="content" required rows={3} />
-      </div>
+      </FieldRow>
       <Button type="submit" size="sm" className="w-full" disabled={pending}>
         {pending ? t.timeline.addNote.submitting : t.timeline.addNote.submit}
       </Button>

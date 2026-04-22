@@ -4,21 +4,40 @@ import { ExternalLink, Pencil, Trash2 } from 'lucide-react';
 import { requireUser } from '@/lib/auth-helpers';
 import { getApplicationById } from '@/features/applications/queries';
 import { deleteApplicationAndRedirect } from '@/features/applications/actions';
+import { getOfferByApplicationId } from '@/features/offers/queries';
+import { listBindingsForApplication, listMaterials } from '@/features/materials/queries';
+import { MaterialPanel } from '@/features/materials/components/material-panel';
 import { StatusBadge, PriorityBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Timeline } from '@/features/applications/components/timeline';
+import { OfferPanel } from '@/features/offers/components/offer-panel';
 import { formatDate, relativeFromNow, isOverdue } from '@/lib/date';
 import { getServerDictionary, getLocale } from '@/lib/i18n/server';
 
-export default async function ApplicationDetailPage({ params }: { params: { id: string } }) {
+export default async function ApplicationDetailPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
   const user = await requireUser();
   const t = getServerDictionary();
   const locale = getLocale();
   const data = await getApplicationById(user.id, params.id);
   if (!data) notFound();
   const { application, company, events, notes } = data;
+  const offer = await getOfferByApplicationId(user.id, application.id);
+  const [materialBindings, materialLibrary] = await Promise.all([
+    listBindingsForApplication(user.id, application.id),
+    listMaterials(user.id),
+  ]);
+
+  const tabParam = typeof searchParams?.tab === 'string' ? searchParams.tab : undefined;
+  const allowedTabs = new Set(['overview', 'timeline', 'materials', 'offer']);
+  const defaultTab = tabParam && allowedTabs.has(tabParam) ? tabParam : 'overview';
 
   async function deleteAction() {
     'use server';
@@ -56,16 +75,12 @@ export default async function ApplicationDetailPage({ params }: { params: { id: 
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="mt-8">
+      <Tabs defaultValue={defaultTab} className="mt-8">
         <TabsList>
           <TabsTrigger value="overview">{t.detail.tabs.overview}</TabsTrigger>
           <TabsTrigger value="timeline">{t.detail.tabs.timeline}</TabsTrigger>
-          <TabsTrigger value="materials" disabled>
-            {t.detail.tabs.materials}
-          </TabsTrigger>
-          <TabsTrigger value="offer" disabled>
-            {t.detail.tabs.offer}
-          </TabsTrigger>
+          <TabsTrigger value="materials">{t.detail.tabs.materials}</TabsTrigger>
+          <TabsTrigger value="offer">{t.detail.tabs.offer}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -130,6 +145,18 @@ export default async function ApplicationDetailPage({ params }: { params: { id: 
 
         <TabsContent value="timeline">
           <Timeline applicationId={application.id} events={events} notes={notes} />
+        </TabsContent>
+
+        <TabsContent value="materials">
+          <MaterialPanel
+            applicationId={application.id}
+            bindings={materialBindings}
+            library={materialLibrary}
+          />
+        </TabsContent>
+
+        <TabsContent value="offer">
+          <OfferPanel applicationId={application.id} offer={offer} />
         </TabsContent>
       </Tabs>
     </div>

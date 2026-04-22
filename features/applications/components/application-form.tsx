@@ -89,6 +89,14 @@ function toDateInputValue(d: Date | string | undefined): string {
   return date.toISOString().slice(0, 10);
 }
 
+/** react-hook-form 的 `watch` 可能返回 Date（zod union 的另一分支），DatePicker 只吃 string。 */
+function asDateInputValue(v: unknown): string {
+  if (!v) return '';
+  if (typeof v === 'string') return v;
+  if (v instanceof Date) return toDateInputValue(v);
+  return '';
+}
+
 export function ApplicationForm({ mode, applicationId, defaultValues }: Props) {
   const t = useT();
   const router = useRouter();
@@ -143,15 +151,25 @@ export function ApplicationForm({ mode, applicationId, defaultValues }: Props) {
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
             label={t.form.fields.company}
+            required
             error={translateError(formState.errors.companyName?.message, t)}
           >
-            <Input placeholder={t.form.placeholders.company} {...register('companyName')} />
+            <Input
+              placeholder={t.form.placeholders.company}
+              aria-invalid={Boolean(formState.errors.companyName)}
+              {...register('companyName')}
+            />
           </Field>
           <Field
             label={t.form.fields.title}
+            required
             error={translateError(formState.errors.title?.message, t)}
           >
-            <Input placeholder={t.form.placeholders.title} {...register('title')} />
+            <Input
+              placeholder={t.form.placeholders.title}
+              aria-invalid={Boolean(formState.errors.title)}
+              {...register('title')}
+            />
           </Field>
           <Field label={t.form.fields.department}>
             <Input placeholder={t.form.placeholders.department} {...register('department')} />
@@ -219,28 +237,30 @@ export function ApplicationForm({ mode, applicationId, defaultValues }: Props) {
           </Field>
           <Field
             label={t.form.fields.deadline}
+            optional
+            optionalText={t.form.hints.optional}
             error={translateError(formState.errors.deadlineAt?.message, t)}
           >
-            <Input
-              type="text"
-              inputMode="numeric"
-              placeholder="yyyy-mm-dd"
-              pattern="\d{4}-\d{2}-\d{2}"
-              autoComplete="off"
-              {...register('deadlineAt')}
+            <DatePicker
+              value={asDateInputValue(watch('deadlineAt'))}
+              onChange={(v) =>
+                setValue('deadlineAt', v as never, { shouldDirty: true, shouldValidate: true })
+              }
+              ariaInvalid={Boolean(formState.errors.deadlineAt)}
             />
           </Field>
           <Field
             label={t.form.fields.appliedOn}
+            optional
+            optionalText={t.form.hints.optional}
             error={translateError(formState.errors.appliedAt?.message, t)}
           >
-            <Input
-              type="text"
-              inputMode="numeric"
-              placeholder="yyyy-mm-dd"
-              pattern="\d{4}-\d{2}-\d{2}"
-              autoComplete="off"
-              {...register('appliedAt')}
+            <DatePicker
+              value={asDateInputValue(watch('appliedAt'))}
+              onChange={(v) =>
+                setValue('appliedAt', v as never, { shouldDirty: true, shouldValidate: true })
+              }
+              ariaInvalid={Boolean(formState.errors.appliedAt)}
             />
           </Field>
           <Field label={t.form.fields.salaryRange}>
@@ -302,15 +322,29 @@ function FormSection({ title, children }: { title: string; children: React.React
 function Field({
   label,
   error,
+  required,
+  optional,
+  optionalText,
   children,
 }: {
   label: string;
   error?: string;
+  required?: boolean;
+  optional?: boolean;
+  optionalText?: string;
   children: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
-      <Label>{label}</Label>
+      <div className="flex items-baseline justify-between gap-2">
+        <Label>
+          {label}
+          {required && <span className="ml-1 text-destructive">*</span>}
+        </Label>
+        {optional && optionalText && (
+          <span className="text-[11px] text-muted-foreground">{optionalText}</span>
+        )}
+      </div>
       {children}
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>

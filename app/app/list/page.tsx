@@ -1,8 +1,16 @@
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth-helpers';
-import { listApplications } from '@/features/applications/queries';
+import {
+  listApplications,
+  listApplicationsWithEvents,
+} from '@/features/applications/queries';
 import { listFiltersSchema } from '@/features/applications/schema';
 import { FilterBar } from '@/features/applications/components/filter-bar';
+import {
+  ViewModeSwitcher,
+  type ListViewMode,
+} from '@/features/applications/components/view-mode-switcher';
+import { ProgressRow } from '@/features/applications/components/progress-row';
 import { StatusBadge, PriorityBadge } from '@/components/status-badge';
 import { EmptyState } from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
@@ -32,18 +40,29 @@ export default async function ListPage({
     priority: typeof searchParams.priority === 'string' ? searchParams.priority : undefined,
     sort: typeof searchParams.sort === 'string' ? searchParams.sort : undefined,
   });
-  const rows = await listApplications(user.id, filters);
+
+  // view 不进 zod —— 它只影响渲染方式，不影响数据筛选，走 page 级 narrow 就够了
+  const view: ListViewMode = searchParams.view === 'progress' ? 'progress' : 'table';
+
+  // 进度视图要额外的 events；普通表格不拉，省一次 batch 查询
+  const { cards, eventsByApplicationId } =
+    view === 'progress'
+      ? await listApplicationsWithEvents(user.id, filters)
+      : { cards: await listApplications(user.id, filters), eventsByApplicationId: new Map() };
 
   return (
     <div className="px-6 py-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">{t.list.title}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t.list.subtitle}</p>
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">{t.list.title}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t.list.subtitle}</p>
+        </div>
+        <ViewModeSwitcher />
       </header>
 
       <div className="space-y-4">
         <FilterBar />
-        {rows.length === 0 ? (
+        {cards.length === 0 ? (
           <EmptyState
             title={t.list.empty.title}
             description={t.list.empty.desc}
@@ -53,6 +72,16 @@ export default async function ListPage({
               </Button>
             }
           />
+        ) : view === 'progress' ? (
+          <div className="space-y-3">
+            {cards.map((card) => (
+              <ProgressRow
+                key={card.id}
+                card={card}
+                events={eventsByApplicationId.get(card.id) ?? []}
+              />
+            ))}
+          </div>
         ) : (
           <div className="rounded-lg border bg-card">
             <Table>
@@ -67,7 +96,7 @@ export default async function ListPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((row) => (
+                {cards.map((row) => (
                   <TableRow key={row.id} className="cursor-pointer">
                     <TableCell className="font-medium">
                       <Link href={`/app/applications/${row.id}`}>{row.companyName}</Link>

@@ -33,10 +33,10 @@ export function AppSidebar() {
     { href: '/app/list', label: t.shell.nav.list, icon: ListChecks },
   ];
   const SECONDARY: NavItem[] = [
-    { href: '/app/calendar', label: t.shell.nav.calendar, icon: Calendar, comingSoon: true },
-    { href: '/app/materials', label: t.shell.nav.materials, icon: PackageOpen, comingSoon: true },
-    { href: '/app/offers', label: t.shell.nav.offers, icon: Trophy, comingSoon: true },
-    { href: '/app/analytics', label: t.shell.nav.analytics, icon: BarChart3, comingSoon: true },
+    { href: '/app/calendar', label: t.shell.nav.calendar, icon: Calendar },
+    { href: '/app/materials', label: t.shell.nav.materials, icon: PackageOpen },
+    { href: '/app/offers', label: t.shell.nav.offers, icon: Trophy },
+    { href: '/app/analytics', label: t.shell.nav.analytics, icon: BarChart3 },
   ];
   const TERTIARY: NavItem[] = [
     { href: '/app/ai', label: t.shell.nav.aiInbox, icon: Sparkles, comingSoon: true },
